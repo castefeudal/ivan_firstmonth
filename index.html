@@ -1,0 +1,640 @@
+import React, { useState, useEffect } from 'react';
+import { Check, Dumbbell, Utensils, Brain, Clock, Info, MessageCircle, Scale, ChefHat, ChevronDown, ChevronUp, Flame, Footprints, Moon, Sun, Coffee, Apple, Droplets, Activity } from 'lucide-react';
+
+const PLAN_DATA = {
+  intro: {
+    title: "Иван, добро пожаловать в MARKOVMADE.",
+    text: [
+      "Это твоя личная система настройки организма. Я учел твою специфику, сидячую работу и йод-терапию.",
+      "Здесь нет мелочей. Мы не просто худеем, мы учим тело работать правильно.",
+      "Следуй инструкциям. Если написано 50г — значит 50г. Дисциплина и спокойствие — твои лучшие друзья на эти 30 дней."
+    ]
+  },
+  weightGuide: {
+    title: "Шпаргалка: Как взвешивать еду? ⚖️",
+    desc: "Это самое важное правило. Мы считаем продукты ДО термической обработки (в сухом или сыром виде).",
+    items: [
+      { name: "Крупы (Гречка, Рис)", raw: "50г сухой", arrow: "→", cooked: "150г каши", icon: "🍚", comment: "Крупа впитывает воду и тяжелеет в 3 раза." },
+      { name: "Мясо / Птица", raw: "200г сырой", arrow: "→", cooked: "150г готовой", icon: "🍗", comment: "Мясо отдает воду и становится легче." },
+      { name: "Макароны", raw: "60г сухих", arrow: "→", cooked: "150г готовых", icon: "🍝", comment: "Взвешиваем макароны из пачки, а не из кастрюли." }
+    ]
+  },
+  nutrition: {
+    title: "Твои цифры (Топливо)",
+    intro: "Твое тело — это биохимическая машина. Заливаем качественное топливо.",
+    saltRule: {
+      title: "🧂 Правило соли (Важно!)",
+      text: "Едим не более 5г и не менее 2г соли в день.",
+      desc: "Полный отказ от соли опасен (судороги, давление), но перебор вызовет отеки. 5г — это одна чайная ложка без горки на ВСЮ еду за день."
+    },
+    meals: [
+      {
+        id: "breakfast",
+        time: "07:30",
+        name: "ЗАВТРАК: Энергия + Гормоны",
+        icon: Coffee,
+        what: "Овсянка (60г сухой) + 3 Яйца (вареные/скрембл)",
+        why: "Овсянка дает долгую энергию мозгу, чтобы ты был продуктивен. Яйца (желтки) нужны для выработки тестостерона и здоровья.",
+        tips: ["Овсянку варим на воде или молоке 1.5%.", "Можно добавить сахарозаменитель, но не сахар."]
+      },
+      {
+        id: "lunch",
+        time: "13:00",
+        name: "ОБЕД: Главный прием пищи",
+        icon: Utensils,
+        what: "Крупа (60г сухой) + Курица (200г сырой) + Овощи + 1 ч.л. Масла",
+        why: "Это твой основной бензин. Курица строит мышцы, крупа восполняет силы после работы, овощи помогают всё переварить.",
+        tips: ["Собери контейнер с вечера.", "Курицу можно заменить на индейку."]
+      },
+      {
+        id: "snack",
+        time: "16:00",
+        name: "ПЕРЕКУС: Подзарядка",
+        icon: Apple,
+        what: "Орехи (30г) + 1 Зеленое яблоко",
+        why: "Полезные жиры из орехов (миндаль/фундук) питают мозг. Яблоко дает объем и витамины. Это помогает не сорваться на ужин.",
+        tips: ["Орехи строго НЕ жареные и НЕ соленые.", "Взвесь орехи, их очень легко переесть!"]
+      },
+      {
+        id: "dinner",
+        time: "19:00",
+        name: "УЖИН: Выбирай сам",
+        icon: Moon,
+        what: "Вариант А: Рыба/Птица (200г сырой) + Салат.\nВариант Б: Творог 5% (200г) + немного йогурта/кефира.",
+        why: "Вечером нам нужен легкий белок. Творог (казеин) питает мышцы всю ночь. Рыба усваивается мгновенно.",
+        tips: ["Если Творог: бери 5% (не обезжиренный!). Можно добавить сахарозаменитель и корицу.", "Если Рыба/Мясо: обязательно с большой порцией зеленых овощей."]
+      }
+    ],
+    swaps: [
+      { cat: "БЕЛКИ (Строительство)", items: "Курица ↔ Индейка ↔ Треска/Хек/Минтай ↔ Творог 5% ↔ Яйца (2 белка = 50г мяса)." },
+      { cat: "УГЛЕВОДЫ (Энергия)", items: "Гречка ↔ Бурый рис ↔ Макароны тв. сортов ↔ Овсянка (монастырская, долгой варки)." },
+      { cat: "ЖИРЫ (Здоровье)", items: "Оливковое масло (в салат) ↔ Авокадо ↔ Орехи (миндаль, фундук, кешью)." }
+    ]
+  },
+  schedule: [
+    { time: "06:30", task: "Подъем + Стакан воды. Запускаем желудок.", icon: Sun },
+    { time: "06:40", task: "Утренняя разминка (см. раздел Зал).", icon: Flame },
+    { time: "07:30", task: "Завтрак. (Овсянка + Яйца).", icon: Coffee },
+    { time: "09:00", task: "Работа. Вставай со стула каждые 50 минут!", icon: Brain },
+    { time: "13:00", task: "Обед. (Гречка + Курица + Овощи).", icon: Utensils },
+    { time: "16:00", task: "Перекус. (Орехи + Яблоко).", icon: Apple },
+    { time: "19:00", task: "Ужин. (Творог ИЛИ Рыба/Птица). Выбирай сам.", icon: Moon },
+    { time: "21:00", task: "Убираем телефон. Готовимся ко сну.", icon: Info },
+    { time: "22:00", task: "Сон. Мышцы растут именно во сне.", icon: Check }
+  ],
+  workouts: {
+    week1: {
+      title: "Неделя 1: Вкат (Дома) 🏠",
+      desc: "Задача: научить мышцы работать. Делаем Пн-Пт. Сб-Вс — отдых и прогулки.",
+      list: [
+        {
+          name: "1. Суставная разминка (ОБЯЗАТЕЛЬНО)",
+          info: "5 минут",
+          tech: "Делаем СВЕРХУ ВНИЗ. Движения плавные, но амплитудные.\n\n1. Шея: Наклоны в стороны и вперед-назад (НЕ вращать!) — 10 раз.\n2. Плечи: Махи прямыми руками вперед и назад (мельница) — по 15 раз.\n3. Локти: Вращение предплечьями внутрь и наружу — по 10 раз.\n4. Кисти: Замок, вращаем кистями — 15 сек.\n5. Таз: Широкие вращения тазом (как хулахуп) — по 10 раз в каждую сторону.\n6. Колени: Ладони на колени, мягкие круговые движения — 15 раз.\n7. Голеностоп: Ставим ногу на носок и вращаем пяткой — по 10 раз."
+        },
+        {
+          name: "2. Приседания (без веса)",
+          info: "3 подхода по 15 раз",
+          tech: "Ноги чуть шире плеч. Спина прямая. Отводи таз назад, как будто садишься на невидимый стул. Пятки НЕ отрывать от пола. Колени смотрят туда же, куда и носки. Встаем на выдохе."
+        },
+        {
+          name: "3. Отжимания с колен",
+          info: "3 подхода по 10-12 раз",
+          tech: "Встань на колени (подложи что-то мягкое). Ладони под плечами. Тело — прямая линия от колен до макушки. Не прогибай поясницу! Опускайся грудью почти до пола. Локти под 45 градусов к телу."
+        },
+        {
+          name: "4. Выпады на месте",
+          info: "3 по 10 на каждую ногу",
+          tech: "Большой шаг вперед. Опускайся вертикально вниз. Колено задней ноги почти касается пола. Угол в обоих коленях 90 градусов. Корпус держи ровно, не заваливайся."
+        },
+        {
+          name: "5. Тяга гантелей к поясу (наклон)",
+          info: "3 подхода по 15 раз (вес 6 кг)",
+          tech: "Возьми гантели. Чуть согни колени, наклони корпус вперед (спина прямая!). Тяни гантели к карманам брюк, сводя лопатки вместе. Представь, что зажимаешь карандаш между лопатками."
+        },
+        {
+          name: "6. Планка на локтях",
+          info: "3 подхода по 30-40 сек",
+          tech: "Упор на локти и носки. Напряги пресс и ягодицы так сильно, как можешь. Не прогибай поясницу! Смотри в пол. Дыши ровно."
+        },
+        {
+           name: "Активность в выходные",
+           tech: "Суббота и Воскресенье: Обязательная прогулка быстрым шагом на свежем воздухе — 30-40 минут. Это тренирует сердце и сжигает лишнее."
+        }
+      ]
+    },
+    week2: {
+      title: "Неделя 2: Зал (Full Body) 🏛️",
+      desc: "Идем в зал 3 раза в неделю (Пн, Ср, Пт). В остальные дни — утренняя зарядка.",
+      list: [
+        {
+          name: "1. Суставная разминка (ДИНАМИКА)",
+          info: "5-7 минут",
+          tech: "Сначала 5 мин ходьбы на дорожке (в горку), затем СВЕРХУ ВНИЗ:\n\n1. Наклоны головы (без резких рывков) — 10 раз.\n2. Махи руками (рывки руками перед грудью + махи вверх-вниз) — разогреваем плечи, 20 сек.\n3. Вращения в локтях и кистях — по 10 раз.\n4. Наклоны корпуса в стороны и вперед (тянемся к полу) — динамично, по 10 раз.\n5. Вращение тазом — 10 раз.\n6. Разминка коленей (круговые движения) — 15 раз.\n7. Голеностоп.\n\nВАЖНО: Мы должны вспотеть еще ДО первого упражнения!"
+        },
+        {
+          name: "2. Жим ногами в тренажере",
+          info: "3 подхода по 12 раз",
+          tech: "Сядь плотно, поясница прижата к спинке. Ноги на платформе на ширине плеч. Толкай платформу пятками. ВАЖНО: В верхней точке колени НЕ выпрямляй полностью, оставляй их чуть согнутыми, чтобы не травмировать сустав."
+        },
+        {
+          name: "3. Тяга верхнего блока к груди",
+          info: "3 подхода по 12 раз",
+          tech: "Возьмись широким хватом. Сядь, зафиксируй колени валиком. Откинь корпус чуть назад. Тяни рукоять к ключицам. Локти идут вниз. Внизу сведи лопатки. Плечи к ушам не тяни."
+        },
+        {
+          name: "4. Жим гантелей лежа",
+          info: "3 подхода по 10 раз",
+          tech: "Ляг на скамью, лопатки сведи и прижми к скамье. Жми гантели вверх над грудью. Опускай плавно. Локти смотрят чуть в стороны, не прижимай их к телу, но и не разводи слишком широко."
+        },
+        {
+          name: "5. Гиперэкстензия (Спина)",
+          info: "3 подхода по 15 раз",
+          tech: "Тренажер для поясницы. Отрегулируй подушки так, чтобы тазовые кости лежали на них, но живот свисал. Опускайся вниз с прямой спиной, поднимайся до прямой линии с ногами. Не выгибайся назад бананом!"
+        },
+        {
+          name: "6. Отжимания (добивка)",
+          info: "3 подхода на максимум",
+          tech: "Делаем от пола или с колен, пока есть силы. Последние повторения должны быть тяжелыми."
+        }
+      ]
+    },
+    week34: {
+      title: "Неделя 3-4: Прогресс 🚀",
+      desc: "Усложняем движения. Веса чуть выше, техника идеальная. 3 раза в неделю.",
+      list: [
+        {
+           name: "1. Суставная разминка (Полная)",
+           info: "7 минут",
+           tech: "Повторяем полный комплекс разминки как во 2-й неделе. Добавляем 1 подход легких приседаний (15 раз) и 10 отжиманий от стены для активации нервной системы перед весами."
+        },
+        {
+          name: "2. Кубковые приседания (Goblet Squat)",
+          info: "4 подхода по 12 раз",
+          tech: "Возьми одну гантель (6-8 кг) двумя руками у груди (как кубок). Ноги шире плеч. Садись глубоко, стараясь локтями коснуться коленей. Спина строго прямая! Гантель помогает держать равновесие."
+        },
+        {
+          name: "3. Тяга горизонтального блока (Сидя)",
+          info: "4 подхода по 12 раз",
+          tech: "Сядь, упрись ногами. Спина прямая. Тяни рукоятку к низу живота. Главное движение — сведение лопаток. Плечи не поднимай. Работай спиной, а не руками."
+        },
+        {
+          name: "4. Бабочка (Pec Deck) - Грудь",
+          info: "3 подхода по 15 раз",
+          tech: "Сядь в тренажер. Локти должны быть на уровне плеч. Своди руки перед собой на выдохе. В центре задержись на 1 секунду, напряги грудь. Плавно разводи обратно."
+        },
+        {
+          name: "5. Выпады с гантелями (Ходьба)",
+          info: "3 подхода по 10 шагов на ногу",
+          tech: "Гантели в опущенных руках. Делаешь шаг вперед, приседаешь, встаешь, делаешь шаг другой ногой. Иди по залу. Спина ровная. Не бей коленом об пол."
+        },
+        {
+          name: "6. Планка (Усложненная)",
+          info: "3 подхода по 60 секунд",
+          tech: "Стоим дольше. Дыши ровно, не задерживай дыхание. Если трясет — это нормально, мышцы работают."
+        }
+      ]
+    }
+  },
+  insights: [
+    {
+      title: "Дисциплина важнее мотивации",
+      why: "В чем суть?",
+      text: "Мотивация — это эмоция, она исчезает, когда ты устал. Дисциплина — это умение делать дело, даже если не хочется.",
+      result: "ПОЛЬЗА: Ты построишь тело, которое останется с тобой навсегда, а не на один сезон."
+    },
+    {
+      title: "Еда — это бензин",
+      why: "Как это понять?",
+      text: "Перестань награждать себя едой за тяжелый день. Еда нужна клеткам для работы, а не душе для радости. Для радости есть хобби.",
+      result: "ПОЛЬЗА: Ты перестанешь заедать стресс и будешь чувствовать ровную энергию весь день."
+    },
+    {
+      title: "Ловушка весов",
+      why: "Почему вес стоит?",
+      text: "Ты начал тренироваться. Мышцы наливаются водой для восстановления, они тяжелые. Жир легкий и уходит, но весы могут этого не показать сразу.",
+      result: "ПОЛЬЗА: Ты не запаникуешь. Смотри в зеркало и на ремень брюк — это самые честные показатели."
+    },
+    {
+      title: "Враг — твой стул",
+      why: "Зачем вставать?",
+      text: "Когда ты сидишь, лимфа (жидкость в теле) застаивается. Это вызывает отеки и вялость. Твоя терапия требует движения.",
+      result: "ПОЛЬЗА: Просто вставая каждые 50 минут, ты ускоряешь обмен веществ на 20%."
+    },
+    {
+      title: "Принцип 20%",
+      why: "Что делать, если нет сил?",
+      text: "В очень плохой день сделай хоть что-то. Сделай разминку и 10 приседаний. Это лучше, чем лежать на диване.",
+      result: "ПОЛЬЗА: Ты сохранишь привычку и не будешь чувствовать вину за пропуск."
+    }
+  ]
+};
+
+// --- Components ---
+
+const Card = ({ children, className = "" }) => (
+  <div className={`bg-slate-900/80 backdrop-blur-md rounded-3xl border border-slate-800 shadow-xl overflow-hidden ${className}`}>
+    {children}
+  </div>
+);
+
+const SectionTitle = ({ children, icon: Icon }) => (
+  <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-3">
+    {Icon && <Icon className="text-amber-500" size={24} />}
+    <span className="bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">
+      {children}
+    </span>
+  </h2>
+);
+
+const TabButton = ({ active, onClick, icon: Icon, label }) => (
+  <button
+    onClick={onClick}
+    className={`flex-1 flex flex-col items-center justify-center py-4 text-[10px] sm:text-xs font-bold uppercase tracking-widest transition-all duration-300 ${
+      active 
+        ? 'text-amber-500 bg-slate-900 border-t-2 border-amber-500 shadow-[0_-4px_20px_rgba(245,158,11,0.1)]' 
+        : 'text-slate-500 hover:text-slate-300 bg-slate-950'
+    }`}
+  >
+    <Icon size={22} className="mb-1" />
+    {label}
+  </button>
+);
+
+const ExerciseCard = ({ item }) => {
+  const [isOpen, setIsOpen] = useState(true);
+
+  return (
+    <div className="bg-slate-950 rounded-2xl border border-slate-800 overflow-hidden mb-3 transition-all hover:border-slate-700">
+      <div 
+        onClick={() => setIsOpen(!isOpen)}
+        className="p-4 flex justify-between items-start cursor-pointer bg-slate-900/50"
+      >
+        <div>
+          <h4 className="font-bold text-white text-base mb-1">{item.name}</h4>
+          {item.info && <span className="text-xs font-mono text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded">{item.info}</span>}
+        </div>
+        {isOpen ? <ChevronUp size={20} className="text-slate-500"/> : <ChevronDown size={20} className="text-slate-500"/>}
+      </div>
+      
+      {isOpen && (
+        <div className="p-4 pt-0 text-sm border-t border-slate-800/50">
+          <div className="mt-3 flex gap-2">
+            <Info size={16} className="text-amber-500 shrink-0 mt-0.5" />
+            <p className="text-slate-300 leading-relaxed whitespace-pre-wrap">
+              <span className="font-bold text-slate-400 block text-xs uppercase mb-1">Техника:</span>
+              {item.tech}
+            </p>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+const MealCard = ({ meal }) => (
+  <div className="bg-slate-950 rounded-2xl border border-slate-800 p-5 mb-4 relative overflow-hidden group">
+    <div className="flex items-center gap-3 mb-3 border-b border-slate-800/50 pb-3">
+       <div className="w-10 h-10 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-500">
+         <meal.icon size={20} />
+       </div>
+       <div>
+         <div className="text-[10px] font-black text-amber-600 uppercase tracking-widest">{meal.time}</div>
+         <h3 className="text-white font-bold text-lg">{meal.name}</h3>
+       </div>
+    </div>
+    
+    <div className="space-y-4">
+      <div>
+        <div className="text-[10px] font-bold text-slate-500 uppercase mb-1">Что едим:</div>
+        <p className="text-white font-medium text-sm sm:text-base leading-relaxed whitespace-pre-wrap">{meal.what}</p>
+      </div>
+      
+      <div className="bg-slate-900/50 p-3 rounded-xl border border-slate-800">
+        <div className="text-[10px] font-bold text-slate-500 uppercase mb-1">Зачем это нужно:</div>
+        <p className="text-slate-400 text-sm leading-relaxed italic">{meal.why}</p>
+      </div>
+
+      <div>
+        <div className="text-[10px] font-bold text-slate-500 uppercase mb-2">Советы:</div>
+        <ul className="space-y-1">
+          {meal.tips.map((tip, i) => (
+            <li key={i} className="flex items-start gap-2 text-xs sm:text-sm text-slate-300">
+              <span className="text-amber-500 mt-0.5">•</span>
+              {tip}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  </div>
+);
+
+// --- Views ---
+
+const HomeView = ({ checks, toggleCheck }) => {
+  const completed = Object.values(checks).filter(Boolean).length;
+  const total = PLAN_DATA.schedule.length;
+  const progress = Math.round((completed / total) * 100);
+
+  return (
+    <div className="space-y-6 pb-24 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <div className="bg-gradient-to-br from-amber-600 to-amber-500 p-6 rounded-3xl shadow-lg shadow-amber-500/20 text-slate-950 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
+        <div className="relative z-10">
+          <div className="flex justify-between items-center mb-2">
+            <span className="font-black text-xs uppercase tracking-widest opacity-80">План на сегодня</span>
+            <span className="font-black text-3xl">{progress}%</span>
+          </div>
+          <div className="w-full bg-slate-950/20 h-3 rounded-full overflow-hidden border border-slate-950/10">
+            <div className="bg-slate-950 h-full transition-all duration-1000 ease-out" style={{ width: `${progress}%` }} />
+          </div>
+          <p className="text-xs font-bold mt-3 opacity-70">
+            {progress === 100 ? "День закрыт. Ты молодец! 🔥" : "Шаг за шагом к цели."}
+          </p>
+        </div>
+      </div>
+
+      <div className="grid gap-3">
+        {PLAN_DATA.schedule.map((item, idx) => (
+          <div 
+            key={idx}
+            onClick={() => toggleCheck(idx)}
+            className={`flex items-center gap-4 p-5 rounded-2xl cursor-pointer transition-all border group ${
+              checks[idx] 
+                ? 'bg-slate-900/40 border-amber-500/20 opacity-50' 
+                : 'bg-slate-900 border-slate-800 hover:border-amber-500/50 hover:shadow-lg hover:shadow-amber-500/5'
+            }`}
+          >
+            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-xl transition-all duration-300 ${
+              checks[idx] 
+                ? 'bg-amber-500 text-slate-900 rotate-0' 
+                : 'bg-slate-950 text-slate-500 group-hover:text-amber-400 group-hover:scale-110'
+            }`}>
+              {checks[idx] ? <Check size={20} strokeWidth={3} /> : <item.icon size={20} />}
+            </div>
+            <div className="flex-1">
+              <div className="text-[10px] font-black text-amber-600 uppercase tracking-widest mb-0.5">{item.time}</div>
+              <div className={`text-sm sm:text-base font-medium transition-colors ${checks[idx] ? 'line-through text-slate-600' : 'text-slate-200'}`}>
+                {item.task}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const NutritionView = () => (
+  <div className="space-y-6 pb-24 animate-in fade-in duration-500">
+    <Card className="p-6 bg-gradient-to-b from-slate-800 to-slate-900 border-amber-500/20">
+      <SectionTitle icon={Scale}>{PLAN_DATA.weightGuide.title}</SectionTitle>
+      <p className="text-slate-400 text-sm mb-4 leading-relaxed">{PLAN_DATA.weightGuide.desc}</p>
+      <div className="space-y-3">
+        {PLAN_DATA.weightGuide.items.map((item, i) => (
+          <div key={i} className="flex flex-col p-4 bg-slate-950/50 rounded-xl border border-slate-800 gap-3">
+            <div className="flex items-center gap-3">
+              <span className="text-2xl">{item.icon}</span>
+              <div>
+                <div className="text-white font-bold text-sm">{item.name}</div>
+                <div className="text-[10px] text-slate-500 font-bold uppercase tracking-wide">{item.comment}</div>
+              </div>
+            </div>
+            <div className="flex items-center justify-between gap-2 font-mono text-xs sm:text-sm bg-slate-900 px-3 py-2 rounded-lg border border-slate-800 mt-1">
+              <span className="text-amber-500 font-bold">{item.raw}</span>
+              <span className="text-slate-600 font-bold px-1">{item.arrow}</span>
+              <span className="text-white font-bold">{item.cooked}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </Card>
+
+    <div className="p-4 bg-slate-800/50 rounded-2xl border-l-4 border-amber-500">
+      <div className="flex items-center gap-2 mb-1">
+        <Droplets size={18} className="text-amber-500" />
+        <h3 className="font-bold text-white text-sm">{PLAN_DATA.nutrition.saltRule.title}</h3>
+      </div>
+      <p className="text-white font-medium text-sm mb-1">{PLAN_DATA.nutrition.saltRule.text}</p>
+      <p className="text-slate-400 text-xs">{PLAN_DATA.nutrition.saltRule.desc}</p>
+    </div>
+
+    <div className="space-y-4">
+      <h2 className="text-xl font-bold text-white pl-2">Твоё Меню на день 🍽️</h2>
+      {PLAN_DATA.nutrition.meals.map((meal) => (
+        <MealCard key={meal.id} meal={meal} />
+      ))}
+    </div>
+
+    <Card className="p-6">
+      <SectionTitle icon={Utensils}>Таблица замен (Шпаргалка)</SectionTitle>
+      <p className="text-slate-400 text-sm mb-4">Если надоела курица, смотри сюда:</p>
+      <div className="grid gap-4">
+        {PLAN_DATA.nutrition.swaps.map((swap, i) => (
+          <div key={i} className="p-5 bg-slate-900 rounded-2xl border border-slate-800">
+            <div className="text-[10px] font-black text-amber-600 uppercase mb-2 tracking-widest">{swap.cat}</div>
+            <div className="text-sm text-slate-300 leading-relaxed font-medium">{swap.items}</div>
+          </div>
+        ))}
+      </div>
+    </Card>
+  </div>
+);
+
+const WorkoutView = () => {
+  const [week, setWeek] = useState(1);
+  
+  let data;
+  if (week === 1) data = PLAN_DATA.workouts.week1;
+  else if (week === 2) data = PLAN_DATA.workouts.week2;
+  else data = PLAN_DATA.workouts.week34;
+
+  return (
+    <div className="space-y-6 pb-24 animate-in fade-in duration-500">
+      <div className="flex bg-slate-900 p-1.5 rounded-2xl border border-slate-800 sticky top-20 z-30 shadow-2xl">
+        <button 
+          onClick={() => setWeek(1)}
+          className={`flex-1 py-3 rounded-xl font-bold text-[10px] sm:text-xs transition-all uppercase tracking-wide ${week === 1 ? 'bg-amber-500 text-slate-900 shadow-lg' : 'text-slate-500 hover:text-white'}`}
+        >
+          Неделя 1
+        </button>
+        <button 
+          onClick={() => setWeek(2)}
+          className={`flex-1 py-3 rounded-xl font-bold text-[10px] sm:text-xs transition-all uppercase tracking-wide ${week === 2 ? 'bg-amber-500 text-slate-900 shadow-lg' : 'text-slate-500 hover:text-white'}`}
+        >
+          Неделя 2
+        </button>
+        <button 
+          onClick={() => setWeek(3)}
+          className={`flex-1 py-3 rounded-xl font-bold text-[10px] sm:text-xs transition-all uppercase tracking-wide ${week === 3 ? 'bg-amber-500 text-slate-900 shadow-lg' : 'text-slate-500 hover:text-white'}`}
+        >
+          Нед. 3-4
+        </button>
+      </div>
+
+      <Card className="p-6">
+        <div className="mb-6">
+          <SectionTitle icon={week === 1 ? Flame : Dumbbell}>{data.title}</SectionTitle>
+          <div className="flex items-start gap-3 text-slate-400 text-sm bg-slate-950/50 p-4 rounded-xl border border-slate-800/50">
+            <Info className="shrink-0 text-amber-600" size={18} />
+            <p>{data.desc}</p>
+          </div>
+        </div>
+        
+        <div className="space-y-2">
+          {data.list.map((item, i) => (
+             <ExerciseCard key={i} item={item} />
+          ))}
+        </div>
+        
+        {week === 1 && (
+           <div className="mt-6 flex items-center gap-3 p-4 rounded-xl bg-green-900/10 border border-green-500/20">
+              <Footprints className="text-green-500" size={24} />
+              <div>
+                 <h4 className="text-green-400 font-bold text-sm">Выходные (Активный отдых)</h4>
+                 <p className="text-slate-400 text-xs mt-1">Прогулка 30-40 минут на свежем воздухе.</p>
+              </div>
+           </div>
+        )}
+      </Card>
+    </div>
+  );
+};
+
+const InsightsView = () => (
+  <div className="space-y-6 pb-24 animate-in fade-in duration-500">
+    <Card className="p-8 bg-gradient-to-br from-amber-600/10 to-slate-950 border-amber-500/10">
+      <SectionTitle icon={Brain}>Мышление</SectionTitle>
+      <div className="space-y-8 mt-6">
+        {PLAN_DATA.insights.map((item, i) => (
+          <div key={i} className="relative pl-6 border-l-2 border-slate-800 hover:border-amber-500 transition-colors">
+             <div className="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-slate-900 border-2 border-slate-700"></div>
+             <h3 className="text-white font-bold text-lg mb-2">{item.title}</h3>
+             
+             <div className="space-y-3">
+               <div>
+                  <div className="text-[10px] font-bold text-amber-600 uppercase tracking-widest mb-1">{item.why}</div>
+                  <p className="text-slate-300 text-sm leading-relaxed">{item.text}</p>
+               </div>
+               <div>
+                  <div className="text-[10px] font-bold text-green-600 uppercase tracking-widest mb-1">ПОЛЬЗА:</div>
+                  <p className="text-slate-400 text-sm italic">{item.result}</p>
+               </div>
+             </div>
+          </div>
+        ))}
+      </div>
+    </Card>
+
+    <div className="p-8 bg-slate-900 rounded-3xl border border-slate-800 text-center shadow-xl">
+      <h3 className="text-white font-bold text-xl mb-2">MARKOVMADE</h3>
+      <p className="text-slate-500 text-sm mb-6">Персональное сопровождение до результата</p>
+      
+      <a 
+        href="https://t.me/markovmade" 
+        target="_blank" 
+        className="flex items-center justify-center gap-3 w-full bg-[#229ED9] hover:bg-[#1f8abf] text-white py-4 rounded-2xl font-bold transition-all shadow-lg shadow-blue-500/20 transform hover:-translate-y-1"
+      >
+        <MessageCircle size={20} />
+        Связаться с Павлом
+      </a>
+    </div>
+  </div>
+);
+
+// --- App Entry ---
+
+export default function App() {
+  const [activeTab, setActiveTab] = useState('home');
+  const [checks, setChecks] = useState({});
+  const [showIntro, setShowIntro] = useState(true);
+
+  useEffect(() => {
+    const today = new Date().toISOString().split('T')[0];
+    const lastDate = localStorage.getItem('ivan_date');
+    const storedChecks = JSON.parse(localStorage.getItem('ivan_checks') || '{}');
+
+    if (lastDate !== today) {
+      localStorage.setItem('ivan_date', today);
+      localStorage.setItem('ivan_checks', '{}');
+      setChecks({});
+    } else {
+      setChecks(storedChecks);
+    }
+  }, []);
+
+  const toggleCheck = (idx) => {
+    const newChecks = { ...checks, [idx]: !checks[idx] };
+    setChecks(newChecks);
+    localStorage.setItem('ivan_checks', JSON.stringify(newChecks));
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-950 text-slate-200 font-sans selection:bg-amber-500/30">
+      <style>{`
+        @font-face {
+          font-family: 'Inter';
+          src: url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800;900&display=swap');
+        }
+        body { font-family: 'Inter', sans-serif; }
+        .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+      `}</style>
+      
+      {showIntro && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-slate-950/95 backdrop-blur-xl animate-in fade-in duration-500">
+          <Card className="max-w-md w-full p-8 border-amber-500/30 shadow-2xl shadow-amber-900/20">
+            <div className="text-center mb-6">
+               <div className="text-[10px] font-black text-amber-500 uppercase tracking-[0.3em] mb-2">MARKOVMADE</div>
+               <h1 className="text-3xl font-black text-white tracking-tighter">ПРИВЕТ, ИВАН! 🤝</h1>
+            </div>
+            <div className="space-y-4 text-slate-300 mb-8 leading-relaxed text-sm text-center">
+              {PLAN_DATA.intro.text.map((p, i) => <p key={i}>{p}</p>)}
+            </div>
+            <button 
+              onClick={() => setShowIntro(false)}
+              className="w-full bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-slate-950 font-black py-4 rounded-2xl transition-all shadow-xl shadow-amber-500/20 uppercase tracking-widest text-xs flex items-center justify-center gap-2 group"
+            >
+              <span>Запустить трансформацию</span>
+              <ChevronDown className="group-hover:translate-y-1 transition-transform" size={16}/>
+            </button>
+          </Card>
+        </div>
+      )}
+
+      {/* Header */}
+      <header className="sticky top-0 z-40 bg-slate-950/80 backdrop-blur-xl border-b border-slate-800 supports-[backdrop-filter]:bg-slate-950/60">
+        <div className="max-w-md mx-auto px-6 py-4 flex justify-between items-center">
+          <div>
+            <div className="text-[10px] font-black text-amber-600 uppercase tracking-[0.2em] mb-0.5">MARKOVMADE</div>
+            <h1 className="text-white font-black text-lg tracking-tight">ИВАН <span className="text-slate-600">30 ДНЕЙ</span></h1>
+          </div>
+          <button 
+            onClick={() => setShowIntro(true)} 
+            className="w-10 h-10 flex items-center justify-center rounded-full bg-slate-900 text-slate-400 hover:text-amber-500 hover:bg-slate-800 transition-all"
+          >
+            <Info size={20} />
+          </button>
+        </div>
+      </header>
+
+      {/* Content Area */}
+      <main className="max-w-md mx-auto px-6 pt-6">
+        {activeTab === 'home' && <HomeView checks={checks} toggleCheck={toggleCheck} />}
+        {activeTab === 'nutrition' && <NutritionView />}
+        {activeTab === 'workout' && <WorkoutView />}
+        {activeTab === 'insights' && <InsightsView />}
+      </main>
+
+      {/* Bottom Nav */}
+      <nav className="fixed bottom-0 left-0 right-0 z-40 bg-slate-950/90 backdrop-blur-xl border-t border-slate-800 pb-safe">
+        <div className="max-w-md mx-auto flex">
+          <TabButton active={activeTab === 'home'} onClick={() => setActiveTab('home')} icon={Clock} label="План" />
+          <TabButton active={activeTab === 'nutrition'} onClick={() => setActiveTab('nutrition')} icon={Utensils} label="Питание" />
+          <TabButton active={activeTab === 'workout'} onClick={() => setActiveTab('workout')} icon={Dumbbell} label="Зал" />
+          <TabButton active={activeTab === 'insights'} onClick={() => setActiveTab('insights')} icon={Brain} label="Инсайты" />
+        </div>
+      </nav>
+    </div>
+  );
+}
