@@ -45,11 +45,12 @@
         body { 
             font-family: 'Inter', sans-serif; 
             background-color: #050505; /* onyx-950 */
-            color: #e4e4e7;
+            color: #f4f4f5; /* zinc-100 для максимальной читабельности */
             -webkit-tap-highlight-color: transparent;
             /* Улучшенное сглаживание шрифтов для читабельности */
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
+            letter-spacing: 0.015em;
         }
         /* Анимации */
         @keyframes fadeIn {
@@ -176,7 +177,7 @@
                     time: "19:00",
                     name: "УЖИН: Ночное восстановление",
                     icon: Moon,
-                    what: "Вариант А: Рыба/Птица (180г сырой) + Салат.\nВариант Б: Творог 5% (150г) + немного кефира.",
+                    what: "Вариант А: Рыба/Птица (180г сырой) + Салат.\nВариант Б: Творог 5% (150г) + немного кефира или классического йогурта.",
                     why: "Легкий белок на ночь. Творог (казеин) мягко питает мышцы, пока ты спишь.",
                     tips: ["Творог берем 5%, обезжиренный не усваивает кальций.", "Вечером никаких углеводов."]
                 }
@@ -419,7 +420,7 @@
                     <div className="p-5 pt-3 text-[15px] border-t border-white/5">
                     <div className="flex gap-3">
                         <Info size={18} className="text-gold-500 shrink-0 mt-1" />
-                        <p className="text-zinc-300 leading-relaxed whitespace-pre-wrap">
+                        <p className="text-zinc-200 leading-relaxed whitespace-pre-wrap">
                         {item.tech.includes('Усложнение:') ? (
                             <span>
                                 <span className="font-bold text-gold-500 text-[11px] tracking-wider uppercase mb-1.5 block">Усложнение техники:</span>
@@ -459,14 +460,14 @@
                 
                 <div className="bg-onyx-900/50 p-5 rounded-2xl border border-white/5 border-l-2 border-l-gold-500/50">
                     <div className="text-[11px] font-bold text-zinc-500 uppercase mb-2 tracking-wider">Зачем это нужно:</div>
-                    <p className="text-zinc-400 text-[14px] leading-relaxed italic">{meal.why}</p>
+                    <p className="text-zinc-300 text-[14px] leading-relaxed italic">{meal.why}</p>
                 </div>
 
                 <div>
                     <div className="text-[11px] font-bold text-zinc-500 uppercase mb-3 tracking-wider">Важные нюансы:</div>
                     <ul className="space-y-2">
                     {meal.tips.map((tip, i) => (
-                        <li key={i} className="flex items-start gap-3 text-[14px] text-zinc-300">
+                        <li key={i} className="flex items-start gap-3 text-[14px] text-zinc-200">
                         <span className="text-gold-500 mt-0.5 font-bold">•</span>
                         <span className="leading-snug">{tip}</span>
                         </li>
@@ -485,7 +486,7 @@
             const progress = Math.round((completed / total) * 100);
 
             return (
-                <div className="space-y-6 pb-32 animate-in">
+                <div className="space-y-6 pb-36 animate-in">
                 <div className="bg-gradient-to-br from-gold-600 to-gold-500 p-7 sm:p-8 rounded-[2rem] shadow-[0_15px_40px_rgba(212,175,55,0.15)] text-onyx-950 relative overflow-hidden">
                     <div className="absolute top-0 right-0 w-48 h-48 bg-white/20 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
                     <div className="relative z-10">
@@ -523,8 +524,8 @@
                         {checks[idx] ? <Check size={24} strokeWidth={3} /> : <item.icon size={22} />}
                         </div>
                         <div className="flex-1">
-                        <div className={`text-[11px] font-bold uppercase tracking-widest mb-1.5 ${checks[idx] ? 'text-zinc-600' : 'text-gold-500'}`}>{item.time}</div>
-                        <div className={`text-[15px] sm:text-base font-medium transition-colors ${checks[idx] ? 'line-through text-zinc-600' : 'text-zinc-100'}`}>
+                        <div className={`text-[11px] font-bold uppercase tracking-widest mb-1.5 ${checks[idx] ? 'text-zinc-500' : 'text-gold-500'}`}>{item.time}</div>
+                        <div className={`text-[15px] sm:text-base font-medium transition-colors ${checks[idx] ? 'line-through text-zinc-500' : 'text-zinc-100'}`}>
                             {item.task}
                         </div>
                         </div>
@@ -536,10 +537,10 @@
         };
 
         const NutritionView = () => (
-            <div className="space-y-6 pb-32 animate-in">
+            <div className="space-y-6 pb-36 animate-in">
                 <Card className="p-7 md:p-8 bg-gradient-to-br from-onyx-800 to-onyx-950 border-gold-500/20 shadow-[0_10px_40px_rgba(212,175,55,0.05)]">
                     <SectionTitle icon={Scale}>{PLAN_DATA.weightGuide.title}</SectionTitle>
-                    <p className="text-zinc-300 text-[15px] mb-6 leading-relaxed">{PLAN_DATA.weightGuide.desc}</p>
+                    <p className="text-zinc-200 text-[15px] mb-6 leading-relaxed">{PLAN_DATA.weightGuide.desc}</p>
                     <div className="space-y-4">
                         {PLAN_DATA.weightGuide.items.map((item, i) => (
                         <div key={i} className="flex flex-col p-5 bg-onyx-950/80 rounded-2xl border border-white/5 gap-4">
@@ -552,7 +553,7 @@
                             </div>
                             <div className="flex items-center justify-between gap-2 font-mono text-[14px] bg-onyx-900 px-5 py-3 rounded-xl border border-white/5 mt-1">
                             <span className="text-gold-400 font-bold">{item.raw}</span>
-                            <span className="text-zinc-600 font-bold px-2">{item.arrow}</span>
+                            <span className="text-zinc-500 font-bold px-2">{item.arrow}</span>
                             <span className="text-white font-bold">{item.cooked}</span>
                             </div>
                         </div>
@@ -566,7 +567,7 @@
                     <h3 className="font-bold text-zinc-100 text-[16px] tracking-wide">{PLAN_DATA.nutrition.saltRule.title}</h3>
                 </div>
                 <p className="text-white font-medium text-[15px] mb-2">{PLAN_DATA.nutrition.saltRule.text}</p>
-                <p className="text-zinc-400 text-[14px] leading-relaxed">{PLAN_DATA.nutrition.saltRule.desc}</p>
+                <p className="text-zinc-300 text-[14px] leading-relaxed">{PLAN_DATA.nutrition.saltRule.desc}</p>
                 </div>
 
                 <div className="space-y-5 pt-3">
@@ -578,12 +579,12 @@
 
                 <Card className="p-7 md:p-8">
                 <SectionTitle icon={ChefHat}>Таблица замен</SectionTitle>
-                <p className="text-zinc-300 text-[15px] mb-6">Шпаргалка, если нужно разнообразие:</p>
+                <p className="text-zinc-200 text-[15px] mb-6">Шпаргалка, если нужно разнообразие:</p>
                 <div className="grid gap-4">
                     {PLAN_DATA.nutrition.swaps.map((swap, i) => (
                     <div key={i} className="p-5 sm:p-6 bg-onyx-950/50 rounded-2xl border border-white/5">
                         <div className="text-[11px] font-bold text-gold-500 uppercase mb-2.5 tracking-widest">{swap.cat}</div>
-                        <div className="text-[14px] text-zinc-200 leading-relaxed font-medium">{swap.items}</div>
+                        <div className="text-[14px] text-zinc-100 leading-relaxed font-medium">{swap.items}</div>
                     </div>
                     ))}
                 </div>
@@ -596,9 +597,9 @@
             const data = PLAN_DATA.workouts[activeTab];
 
             return (
-                <div className="space-y-6 pb-32 animate-in">
-                {/* Навигация по тренировкам - 2x2 Grid */}
-                <div className="grid grid-cols-2 gap-2.5 bg-onyx-900/90 p-2.5 rounded-3xl border border-white/5 sticky top-[72px] z-30 shadow-2xl backdrop-blur-xl">
+                <div className="space-y-6 pb-36 animate-in">
+                {/* Навигация по тренировкам - теперь скроллится вместе с контентом (без прилипания) */}
+                <div className="grid grid-cols-2 gap-2.5 bg-onyx-900 p-2.5 rounded-3xl border border-white/5 shadow-lg">
                     {[
                         { id: 'day1', label: 'ДЕНЬ 1', sub: 'Спина/Ноги' },
                         { id: 'day2', label: 'ДЕНЬ 2', sub: 'Грудь/Плечи' },
@@ -611,13 +612,13 @@
                             className={`flex flex-col items-center justify-center py-3 px-1 rounded-2xl transition-all duration-300 ${
                                 activeTab === btn.id 
                                     ? 'bg-gold-500 text-onyx-950 shadow-[0_0_15px_rgba(212,175,55,0.3)]' 
-                                    : 'text-zinc-400 hover:bg-onyx-800 hover:text-zinc-200'
+                                    : 'text-zinc-400 hover:bg-onyx-800 hover:text-zinc-100'
                             }`}
                         >
                             <span className={`text-[11px] sm:text-xs font-bold uppercase tracking-widest ${activeTab === btn.id ? 'text-onyx-950' : ''}`}>
                                 {btn.label}
                             </span>
-                            <span className={`text-[9px] sm:text-[10px] mt-1 uppercase tracking-wider ${activeTab === btn.id ? 'text-onyx-800 font-semibold' : 'text-zinc-600'}`}>
+                            <span className={`text-[9px] sm:text-[10px] mt-1 uppercase tracking-wider ${activeTab === btn.id ? 'text-onyx-800 font-semibold' : 'text-zinc-500'}`}>
                                 {btn.sub}
                             </span>
                         </button>
@@ -627,7 +628,7 @@
                 <Card className="p-5 sm:p-7 border-white/5 bg-transparent shadow-none">
                     <div className="mb-7">
                     <SectionTitle icon={activeTab === 'day4' ? Home : Dumbbell}>{data.title}</SectionTitle>
-                    <div className="flex items-start gap-4 text-zinc-200 text-[15px] bg-onyx-900 p-6 rounded-2xl border border-white/5 shadow-inner">
+                    <div className="flex items-start gap-4 text-zinc-100 text-[15px] bg-onyx-900 p-6 rounded-2xl border border-white/5 shadow-inner">
                         <Info className="shrink-0 text-gold-500 mt-0.5" size={20} />
                         <p className="leading-relaxed">{data.desc}</p>
                     </div>
@@ -644,10 +645,10 @@
         };
 
         const InsightsView = () => (
-            <div className="space-y-8 pb-32 animate-in">
+            <div className="space-y-8 pb-36 animate-in">
                 <div className="mb-6 px-2">
                     <h2 className="text-[26px] font-bold text-white mb-3 tracking-tight">Точка Опоры</h2>
-                    <p className="text-zinc-400 text-[15px] leading-relaxed">Этот раздел написан для тебя. Читай его, когда мотивация на нуле, а стресс бьет по рукам.</p>
+                    <p className="text-zinc-300 text-[15px] leading-relaxed">Этот раздел написан для тебя. Читай его, когда мотивация на нуле, а стресс бьет по рукам.</p>
                 </div>
 
                 <div className="space-y-7 relative z-10">
@@ -661,12 +662,12 @@
                             <div className="space-y-5">
                             <div>
                                 <div className="text-[11px] font-bold text-gold-500 uppercase tracking-widest mb-2">{item.why}</div>
-                                <p className="text-zinc-300 text-[15px] leading-relaxed">{item.text}</p>
+                                <p className="text-zinc-200 text-[15px] leading-relaxed">{item.text}</p>
                             </div>
                             
                             <div className="mt-5 bg-onyx-950/80 p-5 rounded-2xl border border-white/5">
                                 <div className="text-[11px] font-bold text-green-500 uppercase tracking-widest mb-1.5">ТВОЙ РЕЗУЛЬТАТ:</div>
-                                <p className="text-zinc-300 text-[14px] italic">{item.result.replace('ПОЛЬЗА: ', '')}</p>
+                                <p className="text-zinc-200 text-[14px] italic">{item.result.replace('ПОЛЬЗА: ', '')}</p>
                             </div>
                             </div>
                         </div>
@@ -677,7 +678,7 @@
                 <div className="p-10 mt-10 bg-onyx-900 rounded-[2rem] border border-white/5 text-center shadow-2xl relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-48 h-48 bg-gold-500/5 rounded-full blur-[60px]"></div>
                 <h3 className="text-white font-bold text-2xl mb-2 relative z-10 tracking-tight">MARKOVMADE</h3>
-                <p className="text-zinc-500 text-[11px] font-bold tracking-[0.3em] uppercase mb-8 relative z-10">Наставничество</p>
+                <p className="text-zinc-400 text-[11px] font-bold tracking-[0.3em] uppercase mb-8 relative z-10">Наставничество</p>
                 
                 <a 
                     href="https://t.me/markovmade" 
@@ -719,7 +720,7 @@
             };
 
             return (
-                <div className="min-h-screen bg-onyx-950 text-zinc-200 font-sans selection:bg-gold-500/30">
+                <div className="min-h-screen bg-onyx-950 text-zinc-100 font-sans selection:bg-gold-500/30">
                 
                 {/* Модальное окно (Приветствие) */}
                 {showIntro && (
@@ -733,7 +734,7 @@
                         </h1>
                         </div>
                         
-                        <div className="space-y-5 text-zinc-300 mb-10 text-[15px] leading-relaxed">
+                        <div className="space-y-5 text-zinc-200 mb-10 text-[15px] leading-relaxed">
                             {PLAN_DATA.intro.text.map((p, i) => (
                                 <p key={i} dangerouslySetInnerHTML={{__html: p.replace('я не просто как тренер. Я твой товарищ.', '<span class="text-white font-bold">я не просто как тренер. Я твой товарищ.</span>').replace('Спорт и дисциплина сейчас — это твой главный якорь', '<span class="text-gold-500 font-medium">Спорт и дисциплина сейчас — это твой главный якорь</span>')}}></p>
                             ))}
@@ -750,8 +751,8 @@
                     </div>
                 )}
 
-                {/* Хедер */}
-                <header className="sticky top-0 z-40 bg-onyx-950/80 backdrop-blur-2xl border-b border-white/5 supports-[backdrop-filter]:bg-onyx-950/60">
+                {/* Хедер (Теперь relative, откреплен от верха) */}
+                <header className="relative z-40 bg-onyx-950/80 backdrop-blur-2xl border-b border-white/5 supports-[backdrop-filter]:bg-onyx-950/60">
                     <div className="max-w-md mx-auto px-5 py-5 flex justify-between items-center">
                     <div>
                         <div className="text-[10px] font-bold text-gold-500 uppercase tracking-[0.3em] mb-1">MARKOVMADE</div>
