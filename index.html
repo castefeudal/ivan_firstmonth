@@ -1,9 +1,9 @@
-!DOCTYPE html
+<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MARKOVMADE | Ivan Tracker</title>
+    <title>MARKOVMADE | Иван, жду на связи</title>
     
     <!-- Подключение стилей Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -15,12 +15,22 @@
                         onyx: {
                             800: '#1A1A1A',
                             900: '#111111', 
-                            950: '#050505', // Ультра-глубокий черный
+                            950: '#050505',
                         },
                         gold: {
                             400: '#E6C687',
-                            500: '#D4AF37', // Благородное матовое золото
+                            500: '#D4AF37',
                             600: '#AA8C2C',
+                        }
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'float': 'float 6s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
                         }
                     }
                 }
@@ -31,11 +41,11 @@
     <!-- Шрифт Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     
-    <!-- React и ReactDOM (Ядро приложения) -->
+    <!-- React и ReactDOM -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     
-    <!-- Babel (для работы JSX в браузере) -->
+    <!-- Babel -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     
     <!-- Библиотека иконок Lucide -->
@@ -44,30 +54,32 @@
     <style>
         body { 
             font-family: 'Inter', sans-serif; 
-            background-color: #050505; /* onyx-950 */
-            color: #f4f4f5; /* zinc-100 для максимальной читабельности */
+            background-color: #050505; 
+            color: #f4f4f5; 
             -webkit-tap-highlight-color: transparent;
-            /* Улучшенное сглаживание шрифтов для читабельности */
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
             letter-spacing: 0.015em;
+            margin: 0;
+            overflow-x: hidden;
         }
-        /* Анимации */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        
+        @keyframes fadeInScale {
+            from { opacity: 0; transform: scale(0.95) translateY(20px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
         }
+        
         .animate-in { 
-            animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; 
+            animation: fadeInScale 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; 
         }
-        .pb-safe { 
-            padding-bottom: env(safe-area-inset-bottom); 
+
+        /* Фоновый градиент для премиальности */
+        .ambient-bg {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(circle at 50% 0%, rgba(212, 175, 55, 0.08) 0%, transparent 60%);
+            z-index: -1;
         }
-        /* Улучшенный скроллбар для премиум-вида */
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #27272a; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #D4AF37; }
     </style>
 </head>
 <body>
@@ -76,7 +88,7 @@
     <script type="text/babel">
         const { useState, useEffect } = React;
 
-        // --- Настройка иконок (Polyfill для браузера) ---
+        // --- Настройка иконок ---
         const createIcon = (iconName) => ({ color = "currentColor", size = 24, className = "", ...props }) => {
             const iconDef = lucide.icons[iconName];
             if (!iconDef) return null;
@@ -95,715 +107,90 @@
             }, ...iconDef.map(([tag, attrs]) => React.createElement(tag, attrs)));
         };
 
-        // Объявляем иконки
-        const Check = createIcon('Check');
-        const Dumbbell = createIcon('Dumbbell');
-        const Utensils = createIcon('Utensils');
-        const Brain = createIcon('Brain');
-        const Clock = createIcon('Clock');
-        const Info = createIcon('Info');
         const MessageCircle = createIcon('MessageCircle');
-        const Scale = createIcon('Scale');
-        const ChefHat = createIcon('ChefHat');
-        const ChevronDown = createIcon('ChevronDown');
-        const ChevronUp = createIcon('ChevronUp');
-        const Flame = createIcon('Flame');
-        const Footprints = createIcon('Footprints');
-        const Moon = createIcon('Moon');
-        const Sun = createIcon('Sun');
-        const Coffee = createIcon('Coffee');
-        const Apple = createIcon('Apple');
-        const Droplets = createIcon('Droplets');
-        const Shield = createIcon('Shield');
-        const Home = createIcon('Home');
-        const Layers = createIcon('Layers');
-        const Target = createIcon('Target');
-        const Zap = createIcon('Zap');
-
-        // --- ДАННЫЕ (Обновлено: Правильный зал 2-го месяца и структурированные инсайты) ---
-        const PLAN_DATA = {
-            intro: {
-                title: "БРАТ, МЫ ИДЕМ ДАЛЬШЕ 🤝",
-                text: [
-                    "Иван, минус 7 кг. Ты сделал крутой шаг, это фантастический результат. Но я знаю, что сейчас дома штормит, и период в семье выдался тяжелым.",
-                    "Помни одно: я здесь не просто как тренер. Я твой товарищ. Если накроет стресс — я всегда на связи. Спорт и дисциплина сейчас — это твой главный якорь, когда земля уходит из-под ног.",
-                    "Твой вес 77 кг. Я ювелирно срезал калорийность, чтобы динамика продолжилась, и пересобрал зал под твой текущий уровень подготовки. Держи фокус на себе. Мы со всем справимся."
-                ]
-            },
-            weightGuide: {
-                title: "Шпаргалка: Как взвешивать еду? ⚖️",
-                desc: "Это самое важное правило. Мы считаем продукты ДО термической обработки (в сухом или сыром виде).",
-                items: [
-                { name: "Крупы (Гречка, Рис)", raw: "35г сухой", arrow: "→", cooked: "100г каши", icon: "🍚", comment: "Крупа впитывает воду и тяжелеет." },
-                { name: "Мясо / Птица", raw: "180г сырой", arrow: "→", cooked: "130г готовой", icon: "🍗", comment: "Мясо отдает воду и становится легче." },
-                { name: "Макароны", raw: "40г сухих", arrow: "→", cooked: "100г готовых", icon: "🍝", comment: "Взвешиваем макароны из пачки, а не из кастрюли." }
-                ]
-            },
-            nutrition: {
-                title: "Твои цифры (Топливо)",
-                intro: "Твое тело — это биохимическая машина. Я немного урезал топливо для планомерного сжигания жира при 77 кг.",
-                saltRule: {
-                title: "🧂 Правило соли (Важно!)",
-                text: "Едим не более 5г и не менее 2г соли в день.",
-                desc: "Особенно важно при стрессе. Полный отказ опасен (судороги), перебор вызовет отеки. 5г — чайная ложка без горки на ВСЮ еду за день."
-                },
-                meals: [
-                {
-                    id: "breakfast",
-                    time: "07:30",
-                    name: "ЗАВТРАК: Энергия + Гормоны",
-                    icon: Coffee,
-                    what: "Овсянка (35г сухой) + 3 Яйца (вареные/скрембл)",
-                    why: "Ровный фон энергии на утро. Желтки сейчас критически важны для нервной системы и выработки тестостерона, который падает при стрессе.",
-                    tips: ["Варим на воде или молоке 1.5%.", "Можно добавить сахарозаменитель, но не сахар."]
-                },
-                {
-                    id: "lunch",
-                    time: "13:00",
-                    name: "ОБЕД: Главный прием пищи",
-                    icon: Utensils,
-                    what: "Крупа (35г сухой) + Курица/Индейка (180г сырой) + Овощи + 1 ч.л. Масла",
-                    why: "Восполняем силы. Чуть снизили углеводы, чтобы заставить тело эффективнее использовать собственные жиры при сидячей работе.",
-                    tips: ["Собери контейнер с вечера.", "Овощей можно много (огурцы, зелень, капуста) — они дают объем."]
-                },
-                {
-                    id: "snack",
-                    time: "16:00",
-                    name: "ПЕРЕКУС: Подзарядка",
-                    icon: Apple,
-                    what: "Орехи (15г) + 1 Зеленое яблоко",
-                    why: "Нервной системе нужны полезные жиры (миндаль/грецкий орех). Яблоко спасет от вечернего срыва.",
-                    tips: ["15 грамм орехов — это мало, взвешивай строго!", "Орехи НЕ жареные и НЕ соленые."]
-                },
-                {
-                    id: "dinner",
-                    time: "19:00",
-                    name: "УЖИН: Ночное восстановление",
-                    icon: Moon,
-                    what: "Вариант А: Рыба/Птица (180г сырой) + Салат.\nВариант Б: Творог 5% (150г) + немного кефира или классического йогурта.",
-                    why: "Легкий белок на ночь. Творог (казеин) мягко питает мышцы, пока ты спишь.",
-                    tips: ["Творог берем 5%, обезжиренный не усваивает кальций.", "Вечером никаких углеводов."]
-                }
-                ],
-                swaps: [
-                { cat: "БЕЛКИ (Строительство)", items: "Курица ↔ Индейка ↔ Треска/Минтай ↔ Творог 5% ↔ Яйца." },
-                { cat: "УГЛЕВОДЫ (Энергия)", items: "Гречка ↔ Бурый рис ↔ Макароны тв. сортов ↔ Овсянка." },
-                { cat: "ЖИРЫ (Здоровье)", items: "Оливковое масло ↔ Авокадо (30г) ↔ Орехи (сырые)." }
-                ]
-            },
-            schedule: [
-                { time: "06:30", task: "Подъем + Стакан воды. Запускаем желудок.", icon: Sun },
-                { time: "06:40", task: "Утренняя суставная разминка.", icon: Flame },
-                { time: "07:30", task: "Завтрак. Топливо загружено.", icon: Coffee },
-                { time: "09:00", task: "Работа. Вставай со стула каждые 50 минут!", icon: Brain },
-                { time: "13:00", task: "Обед. Белок + Углеводы.", icon: Utensils },
-                { time: "16:00", task: "Перекус. Орехи (15г) + Яблоко.", icon: Apple },
-                { time: "19:00", task: "Ужин. Чистый белок для восстановления.", icon: Moon },
-                { time: "21:00", task: "Отложи телефон. Почитай 'Свод Правил'.", icon: Layers },
-                { time: "22:00", task: "Сон. Твой главный лекарь от стресса.", icon: Check }
-            ],
-            workouts: {
-                day1: {
-                title: "День 1: СПИНА И БИЦЕПС",
-                desc: "Второй месяц — это постановка нейромышечной связи. Мы не берем сложные упражнения на баланс. Мы берем безопасную базу, чтобы ты научился чувствовать спину и руки.",
-                list: [
-                    {
-                    name: "1. Кардио + Суставная разминка",
-                    info: "10 минут",
-                    tech: "БИОМЕХАНИКА: 5 минут легкого эллипса или дорожки. Затем тщательные круговые вращения плечами, локтями, кистями.\nФОКУС: Выработка суставной жидкости. Без этого к весам не подходим."
-                    },
-                    {
-                    name: "2. Тяга верхнего блока к ключицам",
-                    info: "4 подхода по 12-15 раз",
-                    tech: "БИОМЕХАНИКА: Сядь ровно, чуть отклонись назад. Тяни рукоять к верхней части груди.\nФОКУС: Тяни ЛОКТЯМИ вниз, а не руками. Представь, что кисти — это просто крюки. Внизу сведи лопатки на 1 секунду."
-                    },
-                    {
-                    name: "3. Тяга горизонтального блока к поясу",
-                    info: "4 подхода по 12 раз",
-                    tech: "БИОМЕХАНИКА: Сидя на тренажере. Спина прямая. Тяни рукоять к низу живота.\nФОКУС: Максимальное сведение лопаток. При возврате веса плавно подай плечи вперед, растягивая широчайшие мышцы."
-                    },
-                    {
-                    name: "4. Тяга гантели с упором грудью в скамью",
-                    info: "3 подхода по 12 раз",
-                    tech: "БИОМЕХАНИКА: Скамья 30 градусов. Ляг на неё животом, гантели в обеих руках. Тяни их к поясу.\nФОКУС: Идеальное упражнение для новичка — полностью снимает опасную нагрузку с поясницы. Работай только спиной."
-                    },
-                    {
-                    name: "5. Подъем гантелей на бицепс (поочередно)",
-                    info: "4 подхода по 12 раз на руку",
-                    tech: "БИОМЕХАНИКА: Стоя. Локти жестко прижаты к бокам. Поднимаешь гантель, разворачивая кисть наружу (супинация).\nФОКУС: Медленно опускай вес (3 секунды). Бицепс растет именно в негативной фазе."
-                    },
-                    {
-                    name: "6. Планка классическая",
-                    info: "3 подхода по 45-60 секунд",
-                    tech: "БИОМЕХАНИКА: Тело вытянуто в прямую линию.\nФОКУС: Жестко сожми ягодицы и втяни живот. Дыши ровно."
-                    }
-                ]
-                },
-                day2: {
-                title: "День 2: ГРУДЬ, ПЛЕЧИ И ТРИЦЕПС",
-                desc: "Фокус на жимовые движения. Прорабатываем всю переднюю цепь. Отдельное внимание уделяем трицепсу — именно он дает массивность мужским рукам.",
-                list: [
-                    {
-                    name: "1. Суставная разминка",
-                    info: "5-7 минут",
-                    tech: "БИОМЕХАНИКА: Разогрев с акцентом на плечевые суставы.\nФОКУС: Плечо — самый подвижный и хрупкий сустав. Разомни его идеально."
-                    },
-                    {
-                    name: "2. Жим гантелей на наклонной скамье (30°)",
-                    info: "4 подхода по 12 раз",
-                    tech: "БИОМЕХАНИКА: Угол 30° включает верхний отдел грудных мышц. Лопатки жестко вдавлены в скамью.\nФОКУС: Опускай гантели глубоко, растягивая грудь. Выжимай по дуге вверх. Не стучи гантелями друг об друга."
-                    },
-                    {
-                    name: "3. Сведение рук в тренажере (Pec Deck / Бабочка)",
-                    info: "4 подхода по 15 раз",
-                    tech: "БИОМЕХАНИКА: Безопасная изоляция груди. Локти чуть согнуты.\nФОКУС: Представь, что обнимаешь большое дерево. Сожми грудные в центре на 1 секунду. Не бросай вес назад."
-                    },
-                    {
-                    name: "4. Жим гантелей сидя (Плечи)",
-                    info: "4 подхода по 12 раз",
-                    tech: "БИОМЕХАНИКА: Спинка скамьи поднята почти вертикально. Спина прижата.\nФОКУС: Выжимай вес, но в верхней точке НЕ выпрямляй локти до конца. Это сохранит постоянное напряжение в дельтах."
-                    },
-                    {
-                    name: "5. Разгибание рук в блоке с канатом (Трицепс)",
-                    info: "4 подхода по 15 раз",
-                    tech: "БИОМЕХАНИКА: Стоя у блока. Локти плотно прижаты к ребрам и неподвижны.\nФОКУС: В нижней точке разводи концы каната в стороны, мощно прожимая трицепс."
-                    },
-                    {
-                    name: "6. Махи гантелями в стороны",
-                    info: "4 подхода по 15 раз",
-                    tech: "БИОМЕХАНИКА: Наклон корпуса на 5 градусов вперед.\nФОКУС: Движение ведут локти, а не кисти. Мизинец чуть выше большого пальца. Не задирай плечи к ушам."
-                    }
-                ]
-                },
-                day3: {
-                title: "День 3: НОГИ И КОР (Фундамент)",
-                desc: "Ноги — это огромный мышечный массив. Их тренировка дает максимальный гормональный отклик и сжигает больше всего калорий. Работаем в безопасных тренажерах.",
-                list: [
-                    {
-                    name: "1. Разминка + Кардио",
-                    info: "10 минут",
-                    tech: "БИОМЕХАНИКА: Ходьба в горку + тщательная разминка коленных суставов.\nФОКУС: Разогрев нижней части тела."
-                    },
-                    {
-                    name: "2. Жим ногами в тренажере",
-                    info: "4 подхода по 12-15 раз",
-                    tech: "БИОМЕХАНИКА: Стопы на ширине плеч, посередине платформы.\nФОКУС: Толкай платформу СТРОГО пятками. В верхней точке колени до конца НЕ выпрямляем (бережем суставы)."
-                    },
-                    {
-                    name: "3. Румынская тяга с гантелями",
-                    info: "4 подхода по 12 раз",
-                    tech: "БИОМЕХАНИКА: Колени чуть согнуты. Спина идеально прямая.\nФОКУС: Движение начинается с отведения таза НАЗАД. Гантели скользят по бедрам вниз до натяжения задней поверхности. Подъем за счет ягодиц."
-                    },
-                    {
-                    name: "4. Разгибание ног сидя (Квадрицепс)",
-                    info: "3 подхода по 15 раз",
-                    tech: "БИОМЕХАНИКА: Изоляция передней поверхности бедра.\nФОКУС: В верхней точке сделай паузу на 1 секунду. Жжение должно быть сильным."
-                    },
-                    {
-                    name: "5. Сгибание ног в тренажере",
-                    info: "3 подхода по 15 раз",
-                    tech: "БИОМЕХАНИКА: Изоляция бицепса бедра (лежа или сидя).\nФОКУС: Мощно сокращай мышцу и очень медленно возвращай вес в исходное положение."
-                    },
-                    {
-                    name: "6. Скручивания на пресс",
-                    info: "4 подхода по 20-25 раз",
-                    tech: "БИОМЕХАНИКА: Лежа на полу, ноги согнуты.\nФОКУС: Отрывай только лопатки, скручивая грудную клетку к тазу. Не тяни себя руками за шею!"
-                    }
-                ]
-                },
-                day4: {
-                title: "ДНИ ОТДЫХА: Восстановление",
-                desc: "Полное бездействие ведет к застою лимфы. Легкая стимуляция кровообращения ускорит вывод стрессовых гормонов (кортизола) и поможет телу быстрее восстановиться.",
-                list: [
-                    {
-                    name: "1. Утренняя разминка",
-                    info: "5 минут",
-                    tech: "БИОМЕХАНИКА: Легкие движения всем телом (наклоны, махи).\nФОКУС: Снимаем ночную скованность и запускаем кровеносную систему."
-                    },
-                    {
-                    name: "2. Приседания без веса",
-                    info: "3 подхода по 20 раз",
-                    tech: "БИОМЕХАНИКА: Классические приседания.\nФОКУС: Никакого отказа. Просто качаем кровь в нижнюю часть тела (наш главный мышечный насос)."
-                    },
-                    {
-                    name: "3. Отжимания (от пола или с колен)",
-                    info: "3 подхода по 12-15 раз",
-                    tech: "БИОМЕХАНИКА: Спокойный, размеренный темп.\nФОКУС: Легкий тонус грудных мышц."
-                    },
-                    {
-                    name: "4. Растяжка 'Поза ребенка'",
-                    info: "2 минуты",
-                    tech: "БИОМЕХАНИКА: Сядь тазом на пятки, вытяни руки максимально вперед по полу.\nФОКУС: Расслабь поясницу и глубоко дыши. Снимает физическое и нервное напряжение."
-                    },
-                    {
-                    name: "5. Прогулка на свежем воздухе",
-                    info: "Минимум 30-40 минут",
-                    tech: "БИОМЕХАНИКА: Быстрый, размеренный шаг.\nФОКУС: Идеально делать вечером. Выйди без наушников, продышись. Это лучший естественный антидепрессант."
-                    }
-                ]
-                }
-            },
-            insights: [
-                {
-                tag: "ПСИХОЛОГИЯ СТРЕССА",
-                title: "Точка Опоры",
-                why: "Что делать, когда всё рушится?",
-                text: "Брат, проблемы в семье — это тяжелое испытание. Кажется, что земля уходит из-под ног и контролировать ничего невозможно. Именно сейчас спорт, питание и режим — это твоя броня. Это те вещи, которые зависят на 100% только от тебя. Пусть зал станет твоим якорем. Когда вокруг шторм, держись за дисциплину. Она вытянет.",
-                result: "Возврат контроля над своей жизнью. Режим дает спокойствие уму."
-                },
-                {
-                tag: "ГОРМОНАЛЬНАЯ БАЗА",
-                title: "Кортизол и Эмоциональный голод",
-                why: "Почему тянет сорваться?",
-                text: "Из-за нервов организм вырабатывает кортизол (гормон стресса). Он задерживает воду (вес может стоять) и требует быстрого кайфа — сахара или фастфуда, чтобы заглушить тревогу. Пойми: еда не решит проблемы в семье, она добавит новую проблему — чувство вины. Лови себя на мысли: 'Я сейчас реально голоден, или мне просто тревожно?'.",
-                result: "Ты перестанешь заедать стресс. Вода скоро сольется, и ты увидишь рельеф."
-                },
-                {
-                tag: "МЕНТАЛЬНЫЙ КОНТРОЛЬ",
-                title: "Пауза между стимулом и реакцией",
-                why: "Управление эмоциями",
-                text: "В ссорах и напряженных ситуациях хочется среагировать мгновенно — накричать, обидеться, хлопнуть дверью. Сделай глубокий вдох. Возьми паузу в 5 секунд. Эта пауза делает тебя Мужчиной, который управляет ситуацией, а не эмоциями, которые управляют им. Хладнокровие — твоя суперсила.",
-                result: "Сохранение отношений и нервных клеток. Умение не разрушать, а строить."
-                },
-                {
-                tag: "ФИЗИОЛОГИЯ",
-                title: "Сон — лучший психолог",
-                why: "Почему нельзя мало спать?",
-                text: "Нервная система восстанавливается только во сне. Если ты мало спишь и много нервничаешь, ты сжигаешь свои резервы. Выключай телефон за час до сна. Убирай источники света. Ложись до 23:30. Хороший сон снижает уровень тревожности в 2 раза.",
-                result: "Ясная голова для принятия верных решений и рост мышечной массы."
-                },
-                {
-                tag: "ПОВЕДЕНЧЕСКИЙ ПАТТЕРН",
-                title: "Принцип 20% в черные дни",
-                why: "Когда опускаются руки",
-                text: "Бывают дни, когда моральных сил нет вообще. Не хочется ни в зал, ни готовить. В такие дни сделай хотя бы 20% от плана. Сделай 10 приседаний. Съешь правильный обед, даже если ужин сорвался. Не будь перфекционистом. Лучше сделать плохо, чем не сделать вообще.",
-                result: "Сохранение привычки. Ты не будешь чувствовать себя проигравшим."
-                }
-            ]
-        };
-
-        // --- Компоненты UI ---
-
-        const Card = ({ children, className = "" }) => (
-            <div className={`bg-onyx-900/90 backdrop-blur-xl rounded-3xl border border-white/5 shadow-2xl overflow-hidden ${className}`}>
-                {children}
-            </div>
-        );
-
-        const SectionTitle = ({ children, icon: Icon }) => (
-            <h2 className="text-[22px] font-bold text-white mb-6 flex items-center gap-3">
-                {Icon && <Icon className="text-gold-500" size={26} strokeWidth={2.5} />}
-                <span className="text-zinc-100 tracking-tight">
-                {children}
-                </span>
-            </h2>
-        );
-
-        const TabButton = ({ active, onClick, icon: Icon, label }) => (
-            <button
-                onClick={onClick}
-                className={`flex-1 flex flex-col items-center justify-center py-4 text-[11px] font-bold uppercase tracking-widest transition-all duration-300 ${
-                active 
-                    ? 'text-gold-500 bg-onyx-900 border-t-[3px] border-gold-500 shadow-[0_-10px_30px_rgba(212,175,55,0.15)]' 
-                    : 'text-zinc-500 hover:text-zinc-300 bg-onyx-950 border-t-[3px] border-transparent'
-                }`}
-            >
-                <Icon size={24} className={`mb-1.5 transition-transform ${active ? 'scale-110 drop-shadow-md' : ''}`} />
-                {label}
-            </button>
-        );
-
-        const ExerciseCard = ({ item }) => {
-            const [isOpen, setIsOpen] = useState(true);
-
-            return (
-                <div className="bg-onyx-950/80 rounded-2xl border border-white/5 overflow-hidden mb-3 transition-all hover:border-gold-500/30">
-                <div 
-                    onClick={() => setIsOpen(!isOpen)}
-                    className="p-5 flex justify-between items-start cursor-pointer bg-onyx-900/30"
-                >
-                    <div className="pr-4">
-                    <h4 className="font-bold text-zinc-100 text-[16px] mb-2">{item.name}</h4>
-                    {item.info && <span className="text-xs font-semibold text-gold-500 bg-gold-500/10 px-2.5 py-1 rounded-md">{item.info}</span>}
-                    </div>
-                    {isOpen ? <ChevronUp size={22} className="text-zinc-500 mt-1 shrink-0"/> : <ChevronDown size={22} className="text-zinc-500 mt-1 shrink-0"/>}
-                </div>
-                
-                {isOpen && (
-                    <div className="p-5 pt-4 text-[14px] border-t border-white/5">
-                    <div className="flex gap-4">
-                        <div className="w-[3px] bg-gradient-to-b from-gold-500 to-transparent shrink-0 rounded-full"></div>
-                        <div className="text-zinc-300 leading-relaxed whitespace-pre-wrap flex-1">
-                        {item.tech.split('\n').map((line, i) => {
-                            if(line.includes('БИОМЕХАНИКА:')) return <span key={i} className="block mb-3"><span className="font-bold text-zinc-400 text-[11px] tracking-widest uppercase mb-1 block">{line.split(':')[0]}:</span>{line.split(':')[1]}</span>;
-                            if(line.includes('ФОКУС:')) return <span key={i} className="block mt-2"><span className="font-bold text-gold-500 text-[11px] tracking-widest uppercase mb-1 block">{line.split(':')[0]}:</span><span className="text-zinc-200">{line.split(':')[1]}</span></span>;
-                            return <span key={i} className="block">{line}</span>;
-                        })}
-                        </div>
-                    </div>
-                    </div>
-                )}
-                </div>
-            );
-        }
-
-        const MealCard = ({ meal }) => (
-            <div className="bg-onyx-950/90 rounded-3xl border border-white/5 p-6 sm:p-7 mb-5 relative overflow-hidden group hover:border-gold-500/20 transition-all duration-500">
-                <div className="flex items-center gap-4 mb-5 border-b border-white/5 pb-5">
-                <div className="w-14 h-14 rounded-2xl bg-gold-500/10 flex items-center justify-center text-gold-500 shrink-0 shadow-inner">
-                    <meal.icon size={26} strokeWidth={1.5} />
-                </div>
-                <div>
-                    <div className="text-[11px] font-bold text-gold-600 uppercase tracking-widest mb-1">{meal.time}</div>
-                    <h3 className="text-zinc-100 font-bold text-[18px] tracking-tight">{meal.name}</h3>
-                </div>
-                </div>
-                
-                <div className="space-y-5">
-                <div>
-                    <div className="text-[11px] font-bold text-zinc-500 uppercase mb-2 tracking-wider">Что едим:</div>
-                    <p className="text-zinc-100 font-medium text-[15px] sm:text-base leading-relaxed whitespace-pre-wrap">{meal.what}</p>
-                </div>
-                
-                <div className="bg-onyx-900/50 p-5 rounded-2xl border border-white/5 border-l-2 border-l-gold-500/50">
-                    <div className="text-[11px] font-bold text-zinc-500 uppercase mb-2 tracking-wider">Зачем это нужно:</div>
-                    <p className="text-zinc-300 text-[14px] leading-relaxed italic">{meal.why}</p>
-                </div>
-
-                <div>
-                    <div className="text-[11px] font-bold text-zinc-500 uppercase mb-3 tracking-wider">Важные нюансы:</div>
-                    <ul className="space-y-2">
-                    {meal.tips.map((tip, i) => (
-                        <li key={i} className="flex items-start gap-3 text-[14px] text-zinc-200">
-                        <span className="text-gold-500 mt-0.5 font-bold">•</span>
-                        <span className="leading-snug">{tip}</span>
-                        </li>
-                    ))}
-                    </ul>
-                </div>
-                </div>
-            </div>
-        );
-
-        // --- Экраны (Views) ---
-
-        const HomeView = ({ checks, toggleCheck }) => {
-            const completed = Object.values(checks).filter(Boolean).length;
-            const total = PLAN_DATA.schedule.length;
-            const progress = Math.round((completed / total) * 100);
-
-            return (
-                <div className="space-y-6 pb-36 animate-in">
-                <div className="bg-gradient-to-br from-gold-600 to-gold-500 p-7 sm:p-8 rounded-[2rem] shadow-[0_15px_40px_rgba(212,175,55,0.15)] text-onyx-950 relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-48 h-48 bg-white/20 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
-                    <div className="relative z-10">
-                    <div className="flex justify-between items-end mb-4">
-                        <div>
-                            <span className="font-bold text-[11px] uppercase tracking-widest opacity-80 block mb-1">Прогресс сегодня</span>
-                            <span className="font-black text-5xl tracking-tighter">{progress}%</span>
-                        </div>
-                    </div>
-                    <div className="w-full bg-onyx-950/20 h-3 rounded-full overflow-hidden backdrop-blur-md">
-                        <div className="bg-onyx-950 h-full transition-all duration-1000 ease-out" style={{ width: `${progress}%` }} />
-                    </div>
-                    <p className="text-[14px] font-bold mt-5 opacity-90">
-                        {progress === 100 ? "День закрыт. Красавец! 🔥" : "Дисциплина — твой якорь. Идем дальше."}
-                    </p>
-                    </div>
-                </div>
-
-                <div className="grid gap-3.5">
-                    {PLAN_DATA.schedule.map((item, idx) => (
-                    <div 
-                        key={idx}
-                        onClick={() => toggleCheck(idx)}
-                        className={`flex items-center gap-5 p-5 md:p-6 rounded-[1.5rem] cursor-pointer transition-all border group ${
-                        checks[idx] 
-                            ? 'bg-onyx-900/40 border-white/5 opacity-50' 
-                            : 'bg-onyx-900/90 border-white/10 hover:border-gold-500/40 hover:shadow-[0_10px_30px_rgba(212,175,55,0.08)] backdrop-blur-md'
-                        }`}
-                    >
-                        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-xl transition-all duration-300 shrink-0 ${
-                        checks[idx] 
-                            ? 'bg-gold-500 text-onyx-950 shadow-md' 
-                            : 'bg-onyx-950 border border-white/5 text-zinc-400 group-hover:text-gold-400 group-hover:border-gold-500/30'
-                        }`}>
-                        {checks[idx] ? <Check size={24} strokeWidth={3} /> : <item.icon size={22} />}
-                        </div>
-                        <div className="flex-1">
-                        <div className={`text-[11px] font-bold uppercase tracking-widest mb-1.5 ${checks[idx] ? 'text-zinc-500' : 'text-gold-500'}`}>{item.time}</div>
-                        <div className={`text-[15px] sm:text-base font-medium transition-colors ${checks[idx] ? 'line-through text-zinc-500' : 'text-zinc-100'}`}>
-                            {item.task}
-                        </div>
-                        </div>
-                    </div>
-                    ))}
-                </div>
-                </div>
-            );
-        };
-
-        const NutritionView = () => (
-            <div className="space-y-6 pb-36 animate-in">
-                <Card className="p-7 md:p-8 bg-gradient-to-br from-onyx-800 to-onyx-950 border-gold-500/20 shadow-[0_10px_40px_rgba(212,175,55,0.05)]">
-                    <SectionTitle icon={Scale}>{PLAN_DATA.weightGuide.title}</SectionTitle>
-                    <p className="text-zinc-200 text-[15px] mb-6 leading-relaxed">{PLAN_DATA.weightGuide.desc}</p>
-                    <div className="space-y-4">
-                        {PLAN_DATA.weightGuide.items.map((item, i) => (
-                        <div key={i} className="flex flex-col p-5 bg-onyx-950/80 rounded-2xl border border-white/5 gap-4">
-                            <div className="flex items-center gap-4">
-                            <span className="text-3xl">{item.icon}</span>
-                            <div>
-                                <div className="text-zinc-100 font-bold text-[15px]">{item.name}</div>
-                                <div className="text-[11px] text-zinc-400 font-medium uppercase tracking-wider mt-0.5">{item.comment}</div>
-                            </div>
-                            </div>
-                            <div className="flex items-center justify-between gap-2 font-mono text-[14px] bg-onyx-900 px-5 py-3 rounded-xl border border-white/5 mt-1">
-                            <span className="text-gold-400 font-bold">{item.raw}</span>
-                            <span className="text-zinc-500 font-bold px-2">{item.arrow}</span>
-                            <span className="text-white font-bold">{item.cooked}</span>
-                            </div>
-                        </div>
-                        ))}
-                    </div>
-                </Card>
-
-                <div className="p-6 bg-onyx-900/80 rounded-3xl border-l-[4px] border-gold-500 shadow-lg">
-                <div className="flex items-center gap-3 mb-3">
-                    <Droplets size={22} className="text-gold-500" />
-                    <h3 className="font-bold text-zinc-100 text-[16px] tracking-wide">{PLAN_DATA.nutrition.saltRule.title}</h3>
-                </div>
-                <p className="text-white font-medium text-[15px] mb-2">{PLAN_DATA.nutrition.saltRule.text}</p>
-                <p className="text-zinc-300 text-[14px] leading-relaxed">{PLAN_DATA.nutrition.saltRule.desc}</p>
-                </div>
-
-                <div className="space-y-5 pt-3">
-                <h2 className="text-[22px] font-bold text-white pl-2 tracking-tight">Твоё Меню (Месяц 2) 🍽️</h2>
-                {PLAN_DATA.nutrition.meals.map((meal) => (
-                    <MealCard key={meal.id} meal={meal} />
-                ))}
-                </div>
-
-                <Card className="p-7 md:p-8">
-                <SectionTitle icon={ChefHat}>Таблица замен</SectionTitle>
-                <p className="text-zinc-200 text-[15px] mb-6">Шпаргалка, если нужно разнообразие:</p>
-                <div className="grid gap-4">
-                    {PLAN_DATA.nutrition.swaps.map((swap, i) => (
-                    <div key={i} className="p-5 sm:p-6 bg-onyx-950/50 rounded-2xl border border-white/5">
-                        <div className="text-[11px] font-bold text-gold-500 uppercase mb-2.5 tracking-widest">{swap.cat}</div>
-                        <div className="text-[14px] text-zinc-100 leading-relaxed font-medium">{swap.items}</div>
-                    </div>
-                    ))}
-                </div>
-                </Card>
-            </div>
-        );
-
-        const WorkoutView = () => {
-            const [activeTab, setActiveWorkoutTab] = useState('day1');
-            const data = PLAN_DATA.workouts[activeTab];
-
-            return (
-                <div className="space-y-6 pb-36 animate-in">
-                {/* Навигация по тренировкам - теперь скроллится вместе с контентом (без прилипания) */}
-                <div className="grid grid-cols-2 gap-2.5 bg-onyx-900 p-2.5 rounded-3xl border border-white/5 shadow-lg">
-                    {[
-                        { id: 'day1', label: 'ДЕНЬ 1', sub: 'Спина / Бицепс' },
-                        { id: 'day2', label: 'ДЕНЬ 2', sub: 'Грудь / Трицепс' },
-                        { id: 'day3', label: 'ДЕНЬ 3', sub: 'Ноги / Кор' },
-                        { id: 'day4', label: 'Отдых', sub: 'Восстановление' }
-                    ].map((btn) => (
-                        <button 
-                            key={btn.id}
-                            onClick={() => setActiveWorkoutTab(btn.id)}
-                            className={`flex flex-col items-center justify-center py-3 px-1 rounded-2xl transition-all duration-300 ${
-                                activeTab === btn.id 
-                                    ? 'bg-gold-500 text-onyx-950 shadow-[0_0_15px_rgba(212,175,55,0.3)]' 
-                                    : 'text-zinc-400 hover:bg-onyx-800 hover:text-zinc-100'
-                            }`}
-                        >
-                            <span className={`text-[11px] sm:text-xs font-bold uppercase tracking-widest ${activeTab === btn.id ? 'text-onyx-950' : ''}`}>
-                                {btn.label}
-                            </span>
-                            <span className={`text-[9px] sm:text-[10px] mt-1 uppercase tracking-wider ${activeTab === btn.id ? 'text-onyx-800 font-semibold' : 'text-zinc-500'}`}>
-                                {btn.sub}
-                            </span>
-                        </button>
-                    ))}
-                </div>
-
-                <Card className="p-5 sm:p-7 border-white/5 bg-transparent shadow-none">
-                    <div className="mb-7">
-                    <SectionTitle icon={activeTab === 'day4' ? Home : Dumbbell}>{data.title}</SectionTitle>
-                    <div className="flex items-start gap-4 text-zinc-100 text-[15px] bg-onyx-900 p-6 rounded-2xl border border-white/5 shadow-inner">
-                        <Info className="shrink-0 text-gold-500 mt-0.5" size={20} />
-                        <p className="leading-relaxed">{data.desc}</p>
-                    </div>
-                    </div>
-                    
-                    <div className="space-y-4">
-                    {data.list.map((item, i) => (
-                        <ExerciseCard key={i} item={item} />
-                    ))}
-                    </div>
-                </Card>
-                </div>
-            );
-        };
-
-        const InsightsView = () => (
-            <div className="space-y-8 pb-36 animate-in">
-                <div className="mb-6 px-2">
-                    <h2 className="text-[26px] font-bold text-white mb-3 tracking-tight flex items-center gap-3">
-                        <Layers className="text-gold-500" size={28} /> Свод Правил
-                    </h2>
-                    <p className="text-zinc-300 text-[15px] leading-relaxed">Этот раздел структурирован специально для тебя. Читай его, когда мотивация на нуле, а стресс бьет по рукам.</p>
-                </div>
-
-                <div className="space-y-7 relative z-10">
-                    {PLAN_DATA.insights.map((item, i) => (
-                    <Card key={i} className="p-7 md:p-9 bg-onyx-900/90 border-white/5 relative group">
-                        <div className="absolute top-0 left-0 w-[4px] h-full bg-gold-500/80"></div>
-                        
-                        <div className="pl-4 relative z-10">
-                            {/* Красивый ярлык-категория */}
-                            <div className="inline-block px-3 py-1 bg-gold-500/10 border border-gold-500/20 text-gold-500 text-[9px] font-black uppercase tracking-[0.2em] rounded-md mb-4">
-                                {item.tag}
-                            </div>
-                            
-                            <h3 className="text-zinc-100 font-bold text-xl mb-5 tracking-tight leading-snug">{item.title}</h3>
-                            
-                            <div className="space-y-5">
-                            <div>
-                                <div className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest mb-2">{item.why}</div>
-                                <p className="text-zinc-200 text-[15px] leading-relaxed">{item.text}</p>
-                            </div>
-                            
-                            <div className="mt-5 bg-onyx-950/80 p-5 rounded-2xl border border-white/5 flex items-start gap-4">
-                                <Target className="text-green-500 shrink-0 mt-0.5" size={20} />
-                                <div>
-                                    <div className="text-[10px] font-bold text-green-500 uppercase tracking-widest mb-1.5">ТВОЙ РЕЗУЛЬТАТ:</div>
-                                    <p className="text-zinc-300 text-[14px] leading-relaxed italic">{item.result}</p>
-                                </div>
-                            </div>
-                            </div>
-                        </div>
-                    </Card>
-                    ))}
-                </div>
-
-                <div className="p-10 mt-10 bg-onyx-900 rounded-[2rem] border border-white/5 text-center shadow-2xl relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-48 h-48 bg-gold-500/5 rounded-full blur-[60px]"></div>
-                <h3 className="text-white font-bold text-2xl mb-2 relative z-10 tracking-tight">MARKOVMADE</h3>
-                <p className="text-zinc-400 text-[11px] font-bold tracking-[0.3em] uppercase mb-8 relative z-10">Наставничество</p>
-                
-                <a 
-                    href="https://t.me/markovmade" 
-                    target="_blank" 
-                    className="relative z-10 flex items-center justify-center gap-3 w-full bg-zinc-800 hover:bg-zinc-700 text-white py-5 rounded-2xl font-bold transition-all shadow-[0_10px_30px_rgba(0,0,0,0.3)] active:scale-[0.98] border border-white/5"
-                >
-                    <MessageCircle size={22} className="text-gold-500"/>
-                    Связаться с Павлом
-                </a>
-                </div>
-            </div>
-        );
-
-        // --- Главное приложение ---
+        const ShieldAlert = createIcon('ShieldAlert');
+        const TrendingDown = createIcon('TrendingDown');
+        const Activity = createIcon('Activity');
+        const Award = createIcon('Award');
 
         const App = () => {
-            const [activeTab, setActiveTab] = useState('home');
-            const [checks, setChecks] = useState({});
-            const [showIntro, setShowIntro] = useState(true);
-
-            useEffect(() => {
-                const today = new Date().toISOString().split('T')[0];
-                const lastDate = localStorage.getItem('ivan_date_v5');
-                const storedChecks = JSON.parse(localStorage.getItem('ivan_checks_v5') || '{}');
-
-                if (lastDate !== today) {
-                localStorage.setItem('ivan_date_v5', today);
-                localStorage.setItem('ivan_checks_v5', '{}');
-                setChecks({});
-                } else {
-                setChecks(storedChecks);
-                }
-            }, []);
-
-            const toggleCheck = (idx) => {
-                const newChecks = { ...checks, [idx]: !checks[idx] };
-                setChecks(newChecks);
-                localStorage.setItem('ivan_checks_v5', JSON.stringify(newChecks));
-            };
-
             return (
-                <div className="min-h-screen bg-onyx-950 text-zinc-100 font-sans selection:bg-gold-500/30">
-                
-                {/* Модальное окно (Приветствие) */}
-                {showIntro && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center p-5 bg-onyx-950/95 backdrop-blur-xl animate-in">
+                <div className="min-h-screen flex flex-col items-center justify-center p-5 relative">
+                    <div className="ambient-bg"></div>
                     
-                    <Card className="max-w-md w-full p-8 sm:p-10 border-gold-500/20 shadow-[0_0_50px_rgba(212,175,55,0.1)] bg-onyx-900">
-                        <div className="text-center mb-8">
-                        <div className="inline-block bg-gold-500/10 px-3 py-1 rounded-full border border-gold-500/20 text-[10px] font-black text-gold-500 uppercase tracking-[0.3em] mb-4">MARKOVMADE | ЭТАП 2</div>
-                        <h1 className="text-[28px] sm:text-3xl font-black text-white tracking-tight leading-tight">
-                            {PLAN_DATA.intro.title}
-                        </h1>
-                        </div>
+                    {/* Логотип наверху */}
+                    <div className="absolute top-8 left-0 right-0 flex justify-center opacity-50">
+                        <div className="text-[10px] font-bold text-gold-500 uppercase tracking-[0.4em]">Markovmade</div>
+                    </div>
+
+                    <div className="w-full max-w-lg animate-in">
                         
-                        <div className="space-y-5 text-zinc-200 mb-10 text-[15px] leading-relaxed">
-                            {PLAN_DATA.intro.text.map((p, i) => (
-                                <p key={i} dangerouslySetInnerHTML={{__html: p.replace('я не просто как тренер. Я твой товарищ.', '<span class="text-white font-bold">я не просто как тренер. Я твой товарищ.</span>').replace('Спорт и дисциплина сейчас — это твой главный якорь', '<span class="text-gold-500 font-medium">Спорт и дисциплина сейчас — это твой главный якорь</span>')}}></p>
-                            ))}
+                        {/* Карточка с главным достижением */}
+                        <div className="flex justify-center mb-8 animate-float">
+                            <div className="bg-gradient-to-b from-onyx-800 to-onyx-900 border border-gold-500/30 p-4 rounded-3xl shadow-[0_10px_40px_rgba(212,175,55,0.15)] flex flex-col items-center justify-center min-w-[140px]">
+                                <Award className="text-gold-500 mb-2" size={28} />
+                                <div className="text-3xl font-black text-white tracking-tighter">-7<span className="text-xl text-zinc-400">КГ</span></div>
+                                <div className="text-[9px] text-gold-500 font-bold uppercase tracking-widest mt-1">Твой результат</div>
+                            </div>
                         </div>
-                        
-                        <button 
-                            onClick={() => setShowIntro(false)}
-                            className="w-full bg-gold-500 hover:bg-gold-400 text-onyx-950 font-bold py-4 sm:py-5 rounded-xl transition-all shadow-[0_0_20px_rgba(212,175,55,0.3)] hover:shadow-[0_0_30px_rgba(212,175,55,0.5)] uppercase tracking-widest text-[13px] flex items-center justify-center gap-2"
-                        >
-                            <span>Погнали</span>
-                            <ChevronDown size={20} strokeWidth={2.5}/>
-                        </button>
-                    </Card>
-                    </div>
-                )}
 
-                {/* Хедер */}
-                <header className="relative z-40 bg-onyx-950/80 backdrop-blur-2xl border-b border-white/5 supports-[backdrop-filter]:bg-onyx-950/60">
-                    <div className="max-w-md mx-auto px-5 py-5 flex justify-between items-center">
-                    <div>
-                        <div className="text-[10px] font-bold text-gold-500 uppercase tracking-[0.3em] mb-1">MARKOVMADE</div>
-                        <h1 className="text-white font-bold text-[19px] tracking-tight">ИВАН <span className="text-zinc-600 font-medium px-1.5">|</span> <span className="text-zinc-300">МЕСЯЦ 2</span></h1>
-                    </div>
-                    <button 
-                        onClick={() => setShowIntro(true)} 
-                        className="w-11 h-11 flex items-center justify-center rounded-full bg-onyx-900 border border-white/5 text-zinc-400 hover:text-gold-500 hover:bg-zinc-800 transition-colors shadow-sm"
-                    >
-                        <Info size={22} />
-                    </button>
-                    </div>
-                </header>
+                        {/* Основное письмо */}
+                        <div className="bg-onyx-900/80 backdrop-blur-xl rounded-[2rem] border border-white/5 shadow-2xl overflow-hidden relative">
+                            {/* Блик сверху */}
+                            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-gold-500/50 to-transparent"></div>
+                            
+                            <div className="p-8 sm:p-10">
+                                <h1 className="text-2xl sm:text-[28px] font-black text-white mb-6 tracking-tight leading-tight">
+                                    Иван, пауза — это нормально.<br/>
+                                    <span className="text-gold-500">Главное — не останавливаться.</span>
+                                </h1>
+                                
+                                <div className="space-y-5 text-zinc-300 text-[15px] sm:text-base leading-relaxed">
+                                    <p>
+                                        Вижу, что ты пропал с радаров и оставил сообщения без ответа. Я прекрасно понимаю: бывают моменты, когда жизнь подкидывает штормы, накрывает с головой, и хочется просто поставить всё на паузу.
+                                    </p>
+                                    
+                                    <div className="p-5 bg-onyx-950/50 rounded-2xl border-l-2 border-gold-500 my-6">
+                                        <p className="text-zinc-100 font-medium">
+                                            Но давай вспомним главное: <span className="text-gold-500 font-bold">мы уже сделали крутой рывок и убрали 7 кг</span>. Это мощный фундамент, который ты заложил собственным трудом и дисциплиной. И этот результат никто у тебя не отнимет.
+                                        </p>
+                                    </div>
 
-                {/* Контент */}
-                <main className="max-w-md mx-auto px-4 pt-8 relative z-10">
-                    {activeTab === 'home' && <HomeView checks={checks} toggleCheck={toggleCheck} />}
-                    {activeTab === 'nutrition' && <NutritionView />}
-                    {activeTab === 'workout' && <WorkoutView />}
-                    {activeTab === 'insights' && <InsightsView />}
-                </main>
+                                    <p>
+                                        Как твой наставник, я здесь не для того, чтобы требовать сухие отчеты или осуждать за тишину. Моя задача — помочь тебе пройти через этот период и сохранить то, чего мы уже добились.
+                                    </p>
+                                    
+                                    <p className="text-zinc-400 italic text-[14px]">
+                                        * Доступ к текущей программе временно приостановлен, чтобы мы могли синхронизироваться и при необходимости скорректировать курс под твою текущую загрузку и состояние.
+                                    </p>
+                                </div>
+                            </div>
 
-                {/* Навигация */}
-                <nav className="fixed bottom-0 left-0 right-0 z-40 bg-onyx-950/95 backdrop-blur-2xl border-t border-white/5 pb-safe shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
-                    <div className="max-w-md mx-auto flex">
-                    <TabButton active={activeTab === 'home'} onClick={() => setActiveTab('home')} icon={Clock} label="План" />
-                    <TabButton active={activeTab === 'nutrition'} onClick={() => setActiveTab('nutrition')} icon={Utensils} label="Питание" />
-                    <TabButton active={activeTab === 'workout'} onClick={() => setActiveTab('workout')} icon={Dumbbell} label="Зал" />
-                    <TabButton active={activeTab === 'insights'} onClick={() => setActiveTab('insights')} icon={Brain} label="Опора" />
+                            {/* Акцентный блок с кнопкой */}
+                            <div className="bg-onyx-950/80 p-8 sm:p-10 border-t border-white/5 text-center relative overflow-hidden">
+                                {/* Пульсирующее свечение за кнопкой */}
+                                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 bg-gold-500/20 rounded-full blur-[50px] animate-pulse-slow"></div>
+                                
+                                <h3 className="text-white font-bold text-lg mb-6 relative z-10">Жду от тебя весточки. Просто напиши, как ты.</h3>
+                                
+                                <a 
+                                    href="https://t.me/markovmade" 
+                                    target="_blank" 
+                                    className="relative z-10 group flex items-center justify-center gap-3 w-full bg-gradient-to-r from-gold-600 to-gold-500 text-onyx-950 py-5 rounded-2xl font-black text-[15px] uppercase tracking-widest transition-all duration-300 hover:shadow-[0_0_40px_rgba(212,175,55,0.4)] hover:scale-[1.02] active:scale-[0.98]"
+                                >
+                                    <MessageCircle size={24} strokeWidth={2.5} className="group-hover:animate-bounce" />
+                                    <span>Написать Павлу в Telegram</span>
+                                </a>
+                                
+                                <div className="mt-6 text-[12px] text-zinc-500 font-medium">
+                                    Твой товарищ и наставник, Павел Марков
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </nav>
                 </div>
             );
-        }
+        };
 
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
